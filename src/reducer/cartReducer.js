@@ -32,9 +32,9 @@ const cartReducer = (state, action) => {
         name: product.name,
         color,
         amount,
-        image: product.image[0].url,
+        image: typeof product.image === 'string' ? product.image : product.image[0]?.url || product.image,
         price: product.price,
-        max: product.stock,
+        max: product.stock || 10, // Default stock value if not provided
       };
 
       return {

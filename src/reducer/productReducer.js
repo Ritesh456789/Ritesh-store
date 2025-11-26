@@ -47,10 +47,15 @@ const ProductReducer = (state, action) => {
       };
 
     case "SET_SINGLE_PRODUCT":
+      // Validate that we're setting the correct product
+      console.log("📦 SET_SINGLE_PRODUCT - Setting product:", action.payload?.name);
+      console.log("📦 SET_SINGLE_PRODUCT - Product ID:", action.payload?.id);
+      console.log("📦 SET_SINGLE_PRODUCT - Product image:", action.payload?.image);
+      
       return {
         ...state,
         isSingleLoading: false,
-        singleProduct: action.payload,
+        singleProduct: action.payload || {},
       };
 
     case "SET_SINGLE_ERROR":

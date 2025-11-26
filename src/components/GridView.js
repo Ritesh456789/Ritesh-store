@@ -3,6 +3,16 @@ import styled from "styled-components";
 import Product from "./Product";
 
 const GridView = ({ products }) => {
+  if (!products || products.length === 0) {
+    return (
+      <Wrapper className="section">
+        <div className="container">
+          <p>No products available</p>
+        </div>
+      </Wrapper>
+    );
+  }
+
   return (
     <Wrapper className="section">
       <div className="container grid grid-three-column">

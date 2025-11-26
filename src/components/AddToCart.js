@@ -9,7 +9,7 @@ import { useCartContext } from "../context/cart_context";
 const AddToCart = ({ product }) => {
   const { addToCart } = useCartContext();
 
-  const { id, colors, stock } = product;
+  const { id, colors, stock = 10 } = product; // Default stock value if not provided
 
   const [color, setColor] = useState(colors[0]);
   const [amount, setAmount] = useState(1);

@@ -11,32 +11,81 @@ import { TbTruckDelivery, TbReplace } from "react-icons/tb";
 import Star from "./components/Star";
 import AddToCart from "./components/AddToCart";
 
-const API = "https://api.pujakaitem.com/api/products";
+// Use relative URL for proxy in development, absolute URL for production
+// Proxy is configured in setupProxy.js to handle CORS
+const API = process.env.NODE_ENV === 'production' 
+  ? "https://api.pujakaitem.com/api/products"
+  : "/api/products";
 
 const SingleProduct = () => {
-  const { getSingleProduct, isSingleLoading, singleProduct } =
+  const { getSingleProduct, isSingleLoading, singleProduct, isError } =
     useProductContext();
 
   const { id } = useParams();
 
   const {
-    id: alias,
-    name,
-    company,
-    price,
-    description,
-    stock,
-    stars,
-    reviews,
-    image,
-  } = singleProduct;
+    name = "",
+    company = "",
+    price = 0,
+    description = "",
+    stock = 10, // Default stock value if not provided by API
+    stars = 0,
+    reviews = 0,
+    image = "", // API returns image as string, not array
+  } = singleProduct || {};
 
   useEffect(() => {
-    getSingleProduct(`${API}?id=${id}`);
-  }, []);
+    // Reset single product when ID changes to prevent showing wrong product
+    if (id) {
+      console.log("🔄 SingleProduct - ID changed to:", id);
+      console.log("🔄 SingleProduct - Current product ID:", singleProduct?.id);
+      
+      // If the current product doesn't match the URL ID, reset it
+      if (singleProduct && singleProduct.id && String(singleProduct.id) !== String(id)) {
+        console.log("⚠️ Product ID mismatch detected, fetching correct product...");
+      }
+      
+      getSingleProduct(`${API}?id=${id}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]); // Only depend on id to avoid unnecessary re-fetches
 
   if (isSingleLoading) {
     return <div className="page_loading">Loading.....</div>;
+  }
+
+  // Check for error state
+  if (isError) {
+    return (
+      <div className="page_loading">
+        <p>Error loading product. Please try again later.</p>
+        <p>Product ID: {id}</p>
+      </div>
+    );
+  }
+
+  // Check if singleProduct exists and has data
+  if (!singleProduct || Object.keys(singleProduct).length === 0) {
+    return (
+      <div className="page_loading">
+        <p>Product not found.</p>
+        <p>Product ID: {id}</p>
+      </div>
+    );
+  }
+
+  // Debug: Log the product data
+  console.log("SingleProduct - Product ID from URL:", id);
+  console.log("SingleProduct - singleProduct:", singleProduct);
+  console.log("SingleProduct - Product ID in data:", singleProduct?.id);
+  console.log("SingleProduct - Product name:", singleProduct?.name);
+  console.log("SingleProduct - image field:", image);
+  
+  // Verify the product ID matches
+  if (singleProduct && singleProduct.id && String(singleProduct.id) !== String(id)) {
+    console.error("⚠️ WARNING: Product ID mismatch!");
+    console.error("Expected ID:", id);
+    console.error("Actual ID:", singleProduct.id);
   }
 
   return (

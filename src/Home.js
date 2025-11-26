@@ -7,7 +7,7 @@ import FeatureProduct from "./components/FeatureProduct";
 
 const Home = () => {
   const data = {
-    name: "Ritesh Store ",
+    name: "Rainbow Store ",
   };
 
   return (

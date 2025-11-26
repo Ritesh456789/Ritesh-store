@@ -2,20 +2,53 @@ import React, { useState } from "react";
 import styled from "styled-components";
 
 const MyImage = ({ imgs = [{ url: "" }] }) => {
-  const [mainImage, setMainImage] = useState(imgs[0]);
+  // Handle different image data formats
+  let processedImages = [];
+  
+  if (typeof imgs === 'string') {
+    // If imgs is a single string URL, convert it to the expected format
+    processedImages = [{ url: imgs, filename: "Product image" }];
+  } else if (Array.isArray(imgs)) {
+    if (imgs.length > 0 && typeof imgs[0] === 'string') {
+      // If imgs is an array of strings, convert each to object format
+      processedImages = imgs.map((url, index) => ({ 
+        url, 
+        filename: `Product image ${index + 1}` 
+      }));
+    } else {
+      // If imgs is already an array of objects, use as is
+      processedImages = imgs;
+    }
+  }
+  
+  const [mainImage, setMainImage] = useState(processedImages[0] || { url: "", filename: "" });
+
+  // Check if processedImages is valid and has data
+  if (!processedImages || processedImages.length === 0 || !processedImages[0].url) {
+    return (
+      <Wrapper>
+        <div className="error-message">
+          <p>No images available</p>
+        </div>
+      </Wrapper>
+    );
+  }
 
   return (
     <Wrapper>
       <div className="grid grid-four-column">
-        {imgs.map((curElm, index) => {
+        {processedImages.map((curElm, index) => {
           return (
-            <figure>
+            <figure key={index}>
               <img
                 src={curElm.url}
-                alt={curElm.filename}
+                alt={curElm.filename || `Product image ${index + 1}`}
                 className="box-image--style"
-                key={index}
                 onClick={() => setMainImage(curElm)}
+                onError={(e) => {
+                  console.error("Image failed to load:", curElm.url);
+                  e.target.style.display = 'none';
+                }}
               />
             </figure>
           );
@@ -24,7 +57,14 @@ const MyImage = ({ imgs = [{ url: "" }] }) => {
       {/* 2nd column  */}
 
       <div className="main-screen">
-        <img src={mainImage.url} alt={mainImage.filename} />
+        <img 
+          src={mainImage?.url} 
+          alt={mainImage?.filename || "Main product image"} 
+          onError={(e) => {
+            console.error("Main image failed to load:", mainImage?.url);
+            e.target.style.display = 'none';
+          }}
+        />
       </div>
     </Wrapper>
   );
@@ -66,6 +106,15 @@ const Wrapper = styled.section`
   .grid-four-column {
     grid-template-columns: 1fr;
     grid-template-rows: repeat(4, 1fr);
+  }
+
+  .error-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    color: #666;
+    font-size: 1.2rem;
   }
 
   @media (max-width: ${({ theme }) => theme.media.mobile}) {
